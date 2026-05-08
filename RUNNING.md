@@ -7,7 +7,7 @@ Use this after the one-time setup is complete.
 Open PowerShell in the project folder:
 
 ```powershell
-cd C:\Apurv\code_projects\claude\myLocalKb
+cd path\to\myLocalKb
 ```
 
 Start Ollama in one PowerShell window:
@@ -21,7 +21,7 @@ Leave that window open.
 Open a second PowerShell window and start the app:
 
 ```powershell
-cd C:\Apurv\code_projects\claude\myLocalKb
+cd path\to\myLocalKb
 python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
 ```
 
@@ -42,7 +42,7 @@ No module named uvicorn
 install the project dependencies into the Python you are using:
 
 ```powershell
-cd C:\Apurv\code_projects\claude\myLocalKb
+cd path\to\myLocalKb
 python -m pip install -r requirements.txt
 ```
 
@@ -68,4 +68,3 @@ In the PowerShell window running Uvicorn, press:
 ```text
 Ctrl+C
 ```
-

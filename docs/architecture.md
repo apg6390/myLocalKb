@@ -2,46 +2,27 @@
 
 ## Overview
 
-myLocalKb is a three-layer application: a vanilla JS frontend, a FastAPI backend, and a local AI stack (Ollama + ChromaDB). All components run on the user's machine. No network calls after initial model download.
+myLocalKb is a three-layer application: a vanilla JS frontend, a FastAPI backend, and a local AI stack (Ollama + ChromaDB). All components run on the user's machine. No network calls are made after the initial model download.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        Browser (localhost:8000)              │
-│  ┌──────────────────────┐   ┌──────────────────────────┐   │
-│  │   Document Upload UI  │   │       Chat UI             │   │
-│  └──────────┬───────────┘   └────────────┬─────────────┘   │
-└─────────────┼────────────────────────────┼─────────────────-┘
-              │ POST /api/documents         │ POST /api/query
-              ▼                             ▼
-┌─────────────────────────────────────────────────────────────┐
-│                     FastAPI Backend                          │
-│                                                              │
-│  ┌─────────────────────┐    ┌──────────────────────────┐   │
-│  │  Ingestion Pipeline  │    │      RAG Query Handler    │   │
-│  │                      │    │                          │   │
-│  │  parse → chunk →     │    │  embed question →        │   │
-│  │  embed → store       │    │  retrieve chunks →       │   │
-│  └─────────┬────────────┘    │  assemble prompt →       │   │
-│            │                 │  call LLM → return answer│   │
-│            │                 └──────────────────────────┘   │
-└────────────┼───────────────────────────────┬────────────────┘
-             │                               │
-             ▼                               ▼
-┌────────────────────────┐    ┌──────────────────────────────┐
-│       ChromaDB          │    │        Ollama (local)         │
-│  (persistent on disk)   │    │                              │
-│                         │◄───│  embed: nomic-embed-text     │
-│  - document chunks      │    │  chat:  qwen3:4b             │
-│  - embeddings           │    │                              │
-│  - metadata             │    │  HTTP API: localhost:11434   │
-└────────────────────────┘    └──────────────────────────────┘
-             │
-             ▼
-┌────────────────────────┐
-│   data/chroma_db/       │
-│   data/documents/       │
-│   (local filesystem)    │
-└────────────────────────┘
+```text
+Browser (http://127.0.0.1:8000)
+|-- Document Upload UI -- POST /api/documents
+`-- Chat UI ----------- POST /api/query
+
+FastAPI Backend
+|-- Ingestion Pipeline
+|   `-- parse -> chunk -> embed -> store
+`-- RAG Query Handler
+    `-- embed question -> retrieve chunks -> assemble prompt -> call LLM
+
+Local AI/Data Layer
+|-- ChromaDB
+|   `-- data/chroma_db/
+|-- Uploaded documents
+|   `-- data/documents/
+`-- Ollama
+    |-- embed: nomic-embed-text
+    `-- chat: qwen3:4b
 ```
 
 ---
@@ -50,34 +31,33 @@ myLocalKb is a three-layer application: a vanilla JS frontend, a FastAPI backend
 
 ### Document Ingestion
 
-1. User uploads file via browser → `POST /api/documents` (multipart)
-2. File saved to `data/documents/<uuid>_<filename>`
-3. Parser extracts text (pypdf / python-docx / plain text)
-4. Chunker splits text into overlapping windows (~512 chars, 64 overlap)
-5. Each chunk embedded via Ollama `nomic-embed-text` → 768-dim float vector
-6. Chunks + embeddings + metadata stored in ChromaDB collection `mylocalkb`
-7. Response: `{id, filename, chunks}`
+1. User uploads file via browser to `POST /api/documents` as multipart form data.
+2. File is saved to `data/documents/<uuid>_<filename>`.
+3. Parser extracts text using pypdf, python-docx, python-pptx, or plain text parsing.
+4. Chunker splits text into overlapping windows, defaulting to 512 characters with 64 characters of overlap.
+5. Each chunk is embedded through local Ollama using `nomic-embed-text`.
+6. Chunks, embeddings, and metadata are stored in ChromaDB collection `mylocalkb`.
+7. API returns `{id, filename, chunks}`.
 
 ### Query
 
-1. User types question → `POST /api/query`
-2. Question embedded via Ollama `nomic-embed-text`
-3. ChromaDB cosine similarity search → top-5 chunks retrieved
-4. If no chunks found (distance > threshold) → return "not found" immediately
-5. Chunks injected into LLM system prompt with anti-hallucination instructions
-6. Ollama `qwen3:4b` generates answer
-7. Backend parses answer for `Sources:` block; appends from metadata if missing
-8. Response: `{answer, sources: [filename, ...]}`
+1. User submits a question to `POST /api/query`.
+2. Question is embedded through local Ollama using `nomic-embed-text`.
+3. ChromaDB cosine similarity search retrieves the top matching chunks.
+4. Retrieved chunks are injected into the strict RAG system prompt.
+5. Ollama `qwen3:4b` generates an answer.
+6. Backend enforces source citation if the model omits it.
+7. API returns `{answer, sources}`.
 
 ---
 
 ## Anti-Hallucination Design
 
-Three layers enforce no-hallucination:
+Three layers enforce no-hallucination behavior:
 
-1. **Empty-context short-circuit**: if ChromaDB returns no chunks above the similarity threshold, the backend returns the canned "not found" message without calling the LLM at all.
+1. **Empty-context short-circuit**: if no chunks are retrieved, the backend returns the canned "not found" message without calling the LLM.
 2. **System prompt instruction**: the LLM is explicitly told to answer only from the provided excerpts.
-3. **Source enforcement**: the backend always appends source filenames from ChromaDB metadata, regardless of what the LLM generates.
+3. **Source enforcement**: the backend appends source filenames from ChromaDB metadata if the LLM omits them.
 
 ---
 
@@ -88,9 +68,9 @@ See `docs/adr/` for full Architecture Decision Records.
 | Decision | Choice | Reason |
 |---|---|---|
 | LLM model | qwen3:4b | Apache 2.0, reliable RAG default for constrained laptop hardware |
-| LLM runtime | Ollama | Single binary, cross-platform, manages GGUF quantisation |
+| LLM runtime | Ollama | Single binary, cross-platform, manages model downloads |
 | Embedding model | nomic-embed-text | Apache 2.0, high quality, available via Ollama |
-| Vector store | ChromaDB | In-process (no server), Apache 2.0, persistent |
+| Vector store | ChromaDB | In-process, Apache 2.0, persistent |
 | PDF parser | pypdf | MIT, pure Python, no system library dependencies |
 | Frontend | Vanilla JS | Zero build step, works offline, easy to understand |
 | Config | YAML | Human-readable, easy to edit without code changes |
