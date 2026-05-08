@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>myLocalKb</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar" aria-label="Documents">
+        <div class="brand">
+          <h1>myLocalKb</h1>
+          <p>Local document search</p>
+        </div>
+
+        <section class="upload-section" aria-label="Upload document">
+          <label id="drop-zone" class="drop-zone" for="file-input">
+            <span class="drop-title">Drop files here</span>
+            <span class="drop-subtitle">PDF, DOCX, PPTX, TXT, MD</span>
+          </label>
+          <input id="file-input" type="file" multiple accept=".pdf,.docx,.pptx,.txt,.md" />
+          <div id="upload-status" class="status-line" role="status"></div>
+        </section>
+
+        <section class="document-section" aria-label="Indexed documents">
+          <div class="section-heading">
+            <h2>Documents</h2>
+            <button id="refresh-documents" type="button" title="Refresh documents">Refresh</button>
+          </div>
+          <ul id="document-list" class="document-list"></ul>
+        </section>
+      </aside>
+
+      <section class="chat-panel" aria-label="Chat">
+        <div id="messages" class="messages" aria-live="polite">
+          <article class="message assistant">
+            <div class="message-body">
+              Ask a question about your indexed documents.
+            </div>
+          </article>
+        </div>
+
+        <form id="chat-form" class="chat-form">
+          <textarea
+            id="question-input"
+            rows="2"
+            placeholder="Ask a question..."
+            aria-label="Question"
+          ></textarea>
+          <button id="send-button" type="submit">Send</button>
+        </form>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>

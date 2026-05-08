@@ -1,0 +1,23 @@
+llm:
+  model: qwen3:4b                   # Apache 2.0; use qwen3:8b for higher quality on roomier machines
+  base_url: http://localhost:11434
+  temperature: 0.1
+  max_tokens: 2048
+
+embeddings:
+  model: nomic-embed-text           # Apache 2.0
+  base_url: http://localhost:11434
+
+retrieval:
+  chunk_size: 512                   # characters per chunk
+  chunk_overlap: 64                 # overlap between adjacent chunks
+  top_k: 5                          # chunks retrieved per query
+
+storage:
+  documents_dir: data/documents
+  chroma_dir: data/chroma_db
+  chroma_collection: mylocalkb
+
+server:
+  host: 127.0.0.1
+  port: 8000
