@@ -8,8 +8,17 @@ const chatForm = document.querySelector("#chat-form");
 const questionInput = document.querySelector("#question-input");
 const sendButton = document.querySelector("#send-button");
 
-function setStatus(message) {
+function setStatus(message, state = "info") {
   uploadStatus.textContent = message;
+  uploadStatus.className = `status-line ${state}`;
+}
+
+function uniqueValues(values) {
+  return [...new Set(values.filter((value) => value && value.trim()))];
+}
+
+function stripTrailingSources(text) {
+  return text.replace(/\n\s*Sources:\s*[\s\S]*$/i, "").trim();
 }
 
 function escapeText(value) {
@@ -24,13 +33,14 @@ function appendMessage(role, text, sources = []) {
 
   const body = document.createElement("div");
   body.className = "message-body";
-  body.textContent = text;
+  const uniqueSources = uniqueValues(sources);
+  body.textContent = uniqueSources.length > 0 ? stripTrailingSources(text) : text;
 
-  if (sources.length > 0) {
+  if (uniqueSources.length > 0) {
     const sourceBox = document.createElement("div");
     sourceBox.className = "sources";
     sourceBox.textContent = "Sources:";
-    for (const source of sources) {
+    for (const source of uniqueSources) {
       const item = document.createElement("span");
       item.textContent = source;
       sourceBox.appendChild(item);
@@ -81,7 +91,7 @@ async function uploadDocument(file) {
   const formData = new FormData();
   formData.append("file", file);
 
-  setStatus(`Uploading ${file.name}...`);
+  setStatus(`Uploading ${file.name}...`, "busy");
   const response = await fetch("/api/documents", {
     method: "POST",
     body: formData,
@@ -93,7 +103,7 @@ async function uploadDocument(file) {
   }
 
   const result = await response.json();
-  setStatus(`Indexed ${result.filename} (${result.chunks} chunks).`);
+  setStatus(`Indexed ${result.filename} (${result.chunks} chunks).`, "success");
 }
 
 async function uploadFiles(files) {
@@ -140,7 +150,7 @@ fileInput.addEventListener("change", async () => {
   try {
     await uploadFiles([...fileInput.files]);
   } catch (error) {
-    setStatus(error.message);
+    setStatus(error.message, "error");
   } finally {
     fileInput.value = "";
   }
@@ -161,7 +171,7 @@ dropZone.addEventListener("drop", async (event) => {
   try {
     await uploadFiles([...event.dataTransfer.files]);
   } catch (error) {
-    setStatus(error.message);
+    setStatus(error.message, "error");
   }
 });
 
@@ -169,7 +179,7 @@ refreshButton.addEventListener("click", async () => {
   try {
     await loadDocuments();
   } catch (error) {
-    setStatus(error.message);
+    setStatus(error.message, "error");
   }
 });
 
@@ -180,9 +190,9 @@ documentList.addEventListener("click", async (event) => {
   }
   try {
     await deleteDocument(button.dataset.id);
-    setStatus("Document deleted.");
+    setStatus("Document deleted.", "success");
   } catch (error) {
-    setStatus(error.message);
+    setStatus(error.message, "error");
   }
 });
 
@@ -210,4 +220,4 @@ questionInput.addEventListener("keydown", (event) => {
   }
 });
 
-loadDocuments().catch((error) => setStatus(error.message));
+loadDocuments().catch((error) => setStatus(error.message, "error"));

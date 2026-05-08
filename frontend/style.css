@@ -105,6 +105,33 @@ button:disabled {
   font-size: 13px;
 }
 
+.status-line {
+  min-height: 28px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.status-line.busy {
+  border-color: #f6c768;
+  background: #2d2412;
+  color: #ffe1a1;
+}
+
+.status-line.success {
+  border-color: #62c6a5;
+  background: #13251f;
+  color: #9be7cf;
+}
+
+.status-line.error {
+  border-color: #ff6b6b;
+  background: #2a1517;
+  color: #ffb3b3;
+}
+
 #file-input {
   display: none;
 }

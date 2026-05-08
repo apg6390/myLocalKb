@@ -56,6 +56,8 @@ This script will:
 
 ### 3. Start the app
 
+For day-to-day startup after setup, see `RUNNING.md` in the project root.
+
 **macOS / Linux:**
 ```bash
 # Start Ollama (if not running as a background service)
@@ -105,6 +107,18 @@ The first query cold-loads the model into memory. Subsequent queries are much fa
 uvicorn backend.main:app --host 127.0.0.1 --port 8001
 ```
 Then open `http://localhost:8001`.
+
+### "No module named uvicorn"
+Install dependencies into the Python environment you are using:
+```powershell
+python -m pip install -r requirements.txt
+```
+
+If your default Python is 3.14 and packages fail to install, install Python 3.12 and run:
+```powershell
+py -3.12 -m pip install -r requirements.txt
+py -3.12 -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
+```
 
 ### PDF text not extracted
 Some scanned PDFs are image-only and have no extractable text. Use a PDF with actual text content.

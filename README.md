@@ -21,7 +21,7 @@ Upload your research reports, articles, PDFs, and DOCX files — then ask questi
 
 ### Prerequisites
 
-- Python 3.11+
+- Python 3.11 or 3.12 recommended
 - [Ollama](https://ollama.com/download) (free, open-source local LLM runtime)
 
 ### Setup
@@ -41,16 +41,20 @@ bash setup.sh
 
 ### Run
 
-```bash
-# Start Ollama (if not already running as a service)
-ollama serve &
+See [RUNNING.md](RUNNING.md) for the quick command reference.
 
-# Start the app
-uvicorn backend.main:app --host 127.0.0.1 --port 8000
+**Windows PowerShell:**
+```powershell
+cd C:\Apurv\code_projects\claude\myLocalKb
 
-# Open in your browser
-open http://localhost:8000
+# Window 1
+ollama serve
+
+# Window 2
+python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
 ```
+
+Then open `http://127.0.0.1:8000`.
 
 ---
 
@@ -72,7 +76,7 @@ llm:
 
 ## Adding Documents
 
-1. Open `http://localhost:8000`
+1. Open `http://127.0.0.1:8000`
 2. Drag and drop files onto the upload zone, or click **Choose Files**
 3. Supported formats: `.pdf`, `.docx`, `.pptx`, `.txt`, `.md`
 4. The document is processed and indexed in the background — you'll see a confirmation when ready
@@ -86,7 +90,7 @@ Type your question in the chat box and press **Send**.
 The assistant will:
 - Search your knowledge base for relevant passages
 - Compose an answer based **only** on what it found
-- List the source document(s) at the end of every answer
+- Show a deduplicated source list below each answer
 
 If nothing relevant is found, it will say: *"I could not find relevant information in the knowledge base."*
 
@@ -122,6 +126,7 @@ myLocalKb/
 ```
 
 See `docs/architecture.md` for a full technical overview.
+See `RUNNING.md` for day-to-day startup commands.
 
 ---
 
