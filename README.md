@@ -4,6 +4,8 @@ A fully **offline**, local-only personal knowledge base with a chat interface po
 
 Upload your research reports, articles, PDFs, and DOCX files, then ask questions in plain English and get grounded, cited answers. No cloud. No API keys. No data leaves your machine.
 
+![myLocalKb web interface](docs/assets/web-ui-screenshot.png)
+
 ---
 
 ## Project Status
