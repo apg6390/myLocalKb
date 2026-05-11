@@ -1,6 +1,8 @@
 # myLocalKb
 
-myLocalKb is an offline, local-only personal knowledge base with a browser chat interface. It lets you upload documents, index them locally, and ask grounded questions against your own files using local embeddings, a local vector database, and a local LLM served by Ollama.
+myLocalKb is an offline, local-first personal knowledge base with document upload, local vector search, and an Ollama-powered RAG chat interface.
+
+Upload documents, index them locally, and ask grounded questions against your own files. The app uses local embeddings, a local ChromaDB vector store, and a local LLM served by Ollama.
 
 No cloud LLM APIs are used. No API keys are required. Uploaded documents, embeddings, and vector indexes stay on your machine.
 
@@ -10,33 +12,35 @@ No cloud LLM APIs are used. No API keys are required. Uploaded documents, embedd
 
 ## Project Status
 
-**Early alpha / local prototype.** The core offline upload, retrieval, and chat flow is working, but the app is still being hardened for broader public use. Expect rough edges, especially around installation environments, parser quality, and large-document performance.
+**Early alpha / local prototype.** The core offline upload, retrieval, and chat flow works, but the project is still being hardened. Expect rough edges around installation environments, parser quality, scanned PDFs, and large-document performance.
+
+This repository is public so others can inspect, run, fork, and build on the local-first RAG approach.
+
+---
+
+## What Works Today
+
+- Upload and index `.pdf`, `.docx`, `.pptx`, `.txt`, and `.md` files
+- Store uploaded files and vector data locally under `data/`
+- Generate embeddings locally through Ollama
+- Retrieve relevant chunks with ChromaDB
+- Answer questions with a local Ollama chat model
+- Return source filenames with answers
+- Refuse answers when retrieved context is insufficient
+- Run the frontend without a JavaScript build step
 
 ---
 
 ## Why This Exists
 
-Most RAG-style knowledge-base tools rely on hosted LLMs, hosted embedding APIs, telemetry, or managed vector databases. myLocalKb is intentionally small and local:
+Many RAG-style knowledge-base tools rely on hosted LLMs, hosted embedding APIs, telemetry, or managed vector databases. myLocalKb is intentionally small and local:
 
-- Local FastAPI backend
-- Local Ollama chat model
-- Local Ollama embedding model
-- Local ChromaDB vector store
+- FastAPI backend
 - Vanilla HTML/CSS/JS frontend
-- No build step for the UI
-
----
-
-## Features
-
-- Upload PDF, DOCX, PPTX, TXT, and Markdown files
-- Parse, chunk, embed, and store documents locally
-- Ask questions through a browser chat UI
-- Retrieve relevant document chunks using ChromaDB
-- Generate answers with a local Ollama model
-- Refuse answers when retrieved context is insufficient
-- Show a deduplicated source list below each answer
-- Keep runtime data under `data/`, which is gitignored
+- Ollama for chat and embeddings
+- ChromaDB for local vector storage
+- Plain file upload workflow
+- No cloud API dependency at runtime
 
 ---
 
@@ -64,6 +68,7 @@ Model downloads are handled by Ollama during setup. Model weights are not stored
 | Embeddings | `nomic-embed-text` via Ollama |
 | Vector store | ChromaDB persistent local store |
 | Parsers | pypdf, python-docx, python-pptx, built-in text parsing |
+| Tests | pytest, pytest-asyncio |
 
 ---
 
@@ -75,12 +80,14 @@ Model downloads are handled by Ollama during setup. Model weights are not stored
 - [Ollama](https://ollama.com/download)
 - About 4 GB free disk space for the default models
 
-### Setup
+### Clone
 
 ```bash
 git clone https://github.com/apg6390/myLocalKb.git
 cd myLocalKb
 ```
+
+### Setup
 
 macOS / Linux:
 
@@ -101,17 +108,17 @@ The setup script installs Python dependencies and pulls:
 
 ### Run
 
-See [RUNNING.md](RUNNING.md) for the day-to-day startup commands.
+See [RUNNING.md](RUNNING.md) for day-to-day startup commands.
 
-Windows PowerShell example:
+In one terminal:
 
-```powershell
-cd path\to\myLocalKb
-
-# Window 1
+```bash
 ollama serve
+```
 
-# Window 2
+In another terminal:
+
+```bash
 python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
 ```
 
@@ -138,7 +145,7 @@ llm:
   model: qwen3:8b
 ```
 
-Then pull the selected model with Ollama:
+Then pull the selected model:
 
 ```bash
 ollama pull qwen3:8b
@@ -179,6 +186,19 @@ If the retrieved context is insufficient, it should respond:
 ```text
 I could not find relevant information in the knowledge base.
 ```
+
+---
+
+## API Summary
+
+| Method | Path | Purpose |
+|---|---|---|
+| `POST` | `/api/documents` | Upload and index a document |
+| `GET` | `/api/documents` | List indexed documents |
+| `DELETE` | `/api/documents/{id}` | Delete a document and its chunks |
+| `POST` | `/api/query` | Ask a question against indexed documents |
+
+See [docs/architecture.md](docs/architecture.md) for the data flow.
 
 ---
 
@@ -231,6 +251,21 @@ python -m pytest tests -v
 ```
 
 The repository includes a GitHub Actions workflow at [.github/workflows/tests.yml](.github/workflows/tests.yml).
+
+### Contributing / Forking
+
+This is an early local-first RAG project. Useful areas to explore:
+
+- Better document parsing and layout preservation
+- OCR support for scanned PDFs
+- More file types, such as CSV, XLSX, HTML, or EPUB
+- Improved chunking strategies
+- Better relevance filtering and retrieval scoring
+- Import/export for indexes
+- More robust UI states and accessibility checks
+- Packaging for easier local installation
+
+Keep changes aligned with the local-only constraint: no runtime cloud APIs, no telemetry, no model weights in the repo, and no dependencies that require user data to leave the machine.
 
 ---
 
