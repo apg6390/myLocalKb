@@ -4,7 +4,7 @@
 
 ### All platforms
 
-- Python 3.11 or 3.12 recommended
+- Python 3.11 recommended
 - pip
 - ~4 GB free disk space for default models
 
@@ -133,11 +133,11 @@ Install dependencies into the Python environment you are using:
 python -m pip install -r requirements.txt
 ```
 
-If your default Python is 3.14 and packages fail to install, install Python 3.12 and run:
+If your default Python is 3.12 or newer and ChromaDB dependencies fail to install, install Python 3.11 and run:
 
 ```powershell
-py -3.12 -m pip install -r requirements.txt
-py -3.12 -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
+py -3.11 -m pip install -r requirements.txt
+py -3.11 -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
 ```
 
 ### PDF text not extracted

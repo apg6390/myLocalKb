@@ -11,10 +11,14 @@ from backend.ingestion.chunker import Chunk
 class ChromaStore:
     def __init__(self, settings: Settings | None = None) -> None:
         import chromadb
+        from chromadb.config import Settings as ChromaSettings
 
         self.settings = settings or get_settings()
         ensure_storage_dirs(self.settings)
-        self.client = chromadb.PersistentClient(path=str(self.settings.storage.chroma_dir))
+        self.client = chromadb.PersistentClient(
+            path=str(self.settings.storage.chroma_dir),
+            settings=ChromaSettings(anonymized_telemetry=False),
+        )
         self.collection = self.client.get_or_create_collection(
             name=self.settings.storage.chroma_collection,
             metadata={"hnsw:space": "cosine"},

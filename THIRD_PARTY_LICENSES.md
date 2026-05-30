@@ -12,7 +12,7 @@ This document lists third-party software, models, and tools used by **myLocalKb*
 |---|---:|---|---|
 | fastapi | 0.136.1 | MIT | https://github.com/tiangolo/fastapi |
 | uvicorn | 0.46.0 | BSD-3-Clause | https://github.com/encode/uvicorn |
-| chromadb | 1.5.9 | Apache 2.0 | https://github.com/chroma-core/chroma |
+| chromadb | 0.6.3 | Apache 2.0 | https://github.com/chroma-core/chroma |
 | pypdf | 6.10.0 | MIT | https://github.com/py-pdf/pypdf |
 | python-docx | 1.2.0 | MIT | https://github.com/python-openxml/python-docx |
 | python-pptx | 1.0.2 | MIT | https://github.com/scanny/python-pptx |
@@ -104,4 +104,4 @@ This document lists third-party software, models, and tools used by **myLocalKb*
 
 ---
 
-*Last updated: 2026-05-08*
+*Last updated: 2026-05-30*

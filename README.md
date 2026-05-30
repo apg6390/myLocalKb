@@ -76,7 +76,7 @@ Model downloads are handled by Ollama during setup. Model weights are not stored
 
 ### Prerequisites
 
-- Python 3.11 or 3.12 recommended
+- Python 3.11 recommended
 - [Ollama](https://ollama.com/download)
 - About 4 GB free disk space for the default models
 
@@ -243,6 +243,8 @@ Install dependencies:
 ```bash
 python -m pip install -r requirements.txt
 ```
+
+Use Python 3.11 for the current secure ChromaDB pin. On Windows, Python 3.12 may try to build a native Chroma dependency from source and require Microsoft C++ Build Tools.
 
 Run tests:
 
